@@ -12,6 +12,7 @@ import com.yuantiku.siphon.data.FileEntry;
 import com.yuantiku.siphon.data.apkconfigs.ApkConfig;
 import com.yuantiku.siphon.helper.ApkHelper;
 import com.yuantiku.siphon.helper.JsonHelper;
+import com.yuantiku.siphon.helper.LaunchHelper;
 import com.yuantiku.siphon.mvp.imodel.IFileModel;
 import com.yuantiku.siphon.mvp.model.FileModelFactory;
 import com.yuantiku.siphon.mvp.presenter.FileEntriesListPresenter;
@@ -20,6 +21,8 @@ import com.yuantiku.siphon.mvp.presenter.PresenterFactory;
 import com.yuantiku.siphon.mvp.viewmodel.FileEntriesViewModel;
 
 import javax.inject.Inject;
+
+import bwzz.activityCallback.LaunchArgument;
 
 /**
  * Created by wanghb on 15/9/5.
@@ -49,7 +52,7 @@ public class FileEntriesContext extends BaseContext implements FileEntriesViewMo
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         FileEntriesViewModel fileEntriesViewModel = new FileEntriesViewModel(fileModelFactory, this);
         View view = fileEntriesViewModel.onCreateView(inflater, container, savedInstanceState);
         fileEntriesListPresenter.attachView(fileEntriesViewModel);
@@ -62,8 +65,15 @@ public class FileEntriesContext extends BaseContext implements FileEntriesViewMo
         IFileModel fileModel = fileModelFactory.createFileModel(fileEntry);
         if (fileModel.exists()) {
             ApkHelper.installApk(getActivity(), fileModel);
-        } else {
+        } else if (fileEntry.href.endsWith(".apk")) {
             fileEntriesListPresenter.download(null, fileEntry);
+        } else {
+            Bundle bundle = new Bundle();
+            ApkConfig dirConfig = new ApkConfig(apkConfig);
+            dirConfig.setHref(fileEntry.href);
+            bundle.putString(Key.ApkConfig, JsonHelper.json(dirConfig));
+            LaunchArgument argument = LaunchHelper.createArgument(FileEntriesContext.class, getActivity(), bundle);
+            launch(argument);
         }
     }
 

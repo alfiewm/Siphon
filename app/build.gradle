@@ -1,30 +1,30 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'im.fir.plugin.gradle'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
     def versionMajor = 1
     def versionMinor = 5
 
     defaultConfig {
         applicationId "com.yuantiku.siphon"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 22
         versionCode versionMajor * 10 + versionMinor
         versionName "${versionMajor}.${versionMinor}"
+        resValue "string", "fir_api_token", "7a1f9c7e3ec66f6052f1db329e2abf62"
+        javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
     }
 
-    signingConfigs {
-        signingConf {
-            storeFile file(project.property("signConf.keystoreFile"))
-            storePassword project.property("signConf.storePassword")
-            keyAlias project.property("signConf.keyAlias")
-            keyPassword project.property("signConf.keyPassword")
-        }
-    }
+//    signingConfigs {
+//        signingConf {
+//            storeFile file(project.property("signConf.keystoreFile"))
+//            storePassword project.property("signConf.storePassword")
+//            keyAlias project.property("signConf.keyAlias")
+//            keyPassword project.property("signConf.keyPassword")
+//        }
+//    }
 
     def getCommit = { ->
         def stdout = new ByteArrayOutputStream()
@@ -44,7 +44,7 @@ android {
             } else {
                 fileName = "siphon-debug-${getCommit()}.apk"
             }
-            output.outputFile = new File(file.parent, fileName)
+            output.outputFileName = file.parent + "/" + fileName
         }
     }
 
@@ -52,14 +52,12 @@ android {
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'libs/annotations.pro'
-            signingConfig signingConfigs.signingConf
-            resValue "string", "fir_api_token", project.property("fir.apiToken")
+//            signingConfig signingConfigs.signingConf
         }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'libs/annotations.pro'
-            signingConfig signingConfigs.signingConf
-            resValue "string", "fir_api_token", project.property("fir.apiToken")
+//            signingConfig signingConfigs.signingConf
             applicationVariants.all { variant ->
                 renameOutputApkFile(variant, defaultConfig)
             }
@@ -83,8 +81,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.android.support:design:22.2.1'
+    compile "com.android.support:appcompat-v7:${project.supportLibVersion}"
+    compile "com.android.support:design:${project.supportLibVersion}"
     compile 'io.reactivex:rxandroid:1.0.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'org.jsoup:jsoup:1.6.1'
@@ -97,9 +95,8 @@ dependencies {
     compile 'com.orhanobut:hawk:1.18'
     compile 'se.emilsjolander:sprinkles:1.2.0'
     compile "com.google.dagger:dagger:2.0.1"
-    apt "com.google.dagger:dagger-compiler:2.0.1"
+    annotationProcessor "com.google.dagger:dagger-compiler:2.0.1"
 
-    compile(name: 'fir-sdk-1.3.7', ext: 'aar')
     compile 'be.shouldit:android-proxy-library:4.2.6'
     // Unit testing dependencies
     testCompile 'junit:junit:4.12'
@@ -107,14 +104,4 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.10.19'
     // Set this dependency if you want to use Hamcrest matching
     androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
-}
-
-fir {
-    apiToken project.property("fir.apiToken")
-    changeLog '也许是有诚意的更新提醒做作用的时候了\n快速设置和清除代理'
-}
-
-bughd{
-    projectId '55d738bba1de52647a00000c'
-    apiToken project.property("bughd.apiToken")
 }

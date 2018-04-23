@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +59,7 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
 
     enum TabTag {
         all, guess,
-    };
+    }
 
     private IHandler handler = EmptyObjectFactory.createEmptyObject(IHandler.class);
 
@@ -71,11 +74,16 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
         this.handler = handler;
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         TabLayout tabLayout = new TabLayout(container.getContext());
-        tabLayout.addTab(tabLayout.newTab().setText("所有").setTag(TabTag.all));
-        tabLayout.addTab(tabLayout.newTab().setText("猜你想要").setTag(TabTag.guess));
+        SpannableStringBuilder ssBuilder = new SpannableStringBuilder("所有");
+        ssBuilder.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        TabLayout.Tab allTab = tabLayout.newTab().setText(ssBuilder).setTag(TabTag.all);
+        tabLayout.addTab(allTab);
+        SpannableStringBuilder wishBuilder = new SpannableStringBuilder("猜你想要");
+        wishBuilder.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        TabLayout.Tab wishTab = tabLayout.newTab().setText(wishBuilder).setTag(TabTag.guess);
+        tabLayout.addTab(wishTab);
         tabLayout.setOnTabSelectedListener(this);
         swipeRefreshLayout = new SwipeRefreshLayout(container.getContext());
         listView = new ListView(container.getContext());
@@ -111,7 +119,8 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
     }
 
     @Override
-    public void renderDownloadStart(FileEntry fileEntry) {}
+    public void renderDownloadStart(FileEntry fileEntry) {
+    }
 
     @Override
     public void renderDownloadProgress(FileEntry fileEntry, float percent) {
@@ -227,7 +236,7 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
                 return;
             }
             textView.setText(fileEntry.name);
-            textView.setTextColor(Color.GREEN);
+            textView.setTextColor(Color.parseColor("#239609"));
         }
 
         public void updateItemDownloadFailed(FileEntry fileEntry) {
@@ -284,7 +293,7 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
             textView.setPadding(pad, pad, pad, pad);
 
             IFileModel fileModel = fileModelFactory.createFileModel(fileEntry);
-            textView.setTextColor(fileModel.exists() ? Color.GREEN : Color.BLACK);
+            textView.setTextColor(fileModel.exists() ? Color.parseColor("#239609") : Color.BLACK);
 
             String key = (String) textView.getTag();
             if (!TextUtils.isEmpty(key)) {

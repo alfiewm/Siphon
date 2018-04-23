@@ -1,5 +1,7 @@
 package com.yuantiku.siphon.data.apkconfigs;
 
+import android.text.TextUtils;
+
 import proguard.annotation.KeepClassMemberNames;
 
 /**
@@ -7,19 +9,38 @@ import proguard.annotation.KeepClassMemberNames;
  */
 @KeepClassMemberNames
 public class ApkConfig {
+
     int id;
     String name;
     ApkType type;
     String icon;
     int color;
     String packageName;
+    String href;
+
+    public ApkConfig() {
+    }
+
+    public ApkConfig(ApkConfig other) {
+        this.id = other.id;
+        this.name = other.name;
+        this.type = other.type;
+        this.icon = other.icon;
+        this.color = other.color;
+        this.packageName = other.packageName;
+        this.href = other.href;
+    }
 
     public int getId() {
         return id;
     }
 
     public String getName() {
-        return name;
+        if (TextUtils.isEmpty(href)) {
+            return name;
+        } else {
+            return name + href.substring(href.lastIndexOf("/") + 1);
+        }
     }
 
     public ApkType getType() {
@@ -27,7 +48,11 @@ public class ApkConfig {
     }
 
     public String getListPath() {
-        return String.format("android/%d/%s", id, type.name());
+        if (TextUtils.isEmpty(href)) {
+            return String.format("android/%d/%s", id, type.name());
+        } else {
+            return href.substring(href.indexOf('=') + 1);
+        }
     }
 
     public String getIcon() {
@@ -40,6 +65,10 @@ public class ApkConfig {
 
     public String getPackageName() {
         return packageName;
+    }
+
+    public void setHref(String href) {
+        this.href = href;
     }
 
     @Override
