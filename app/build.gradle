@@ -44,7 +44,7 @@ android {
             } else {
                 fileName = "siphon-debug-${getCommit()}.apk"
             }
-            output.outputFileName = file.parent + "/" + fileName
+            output.outputFileName = fileName
         }
     }
 
