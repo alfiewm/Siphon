@@ -2,8 +2,6 @@
 gradle.properties
 app/proguard_mapping.txt
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 /.idea
 .DS_Store
 /build

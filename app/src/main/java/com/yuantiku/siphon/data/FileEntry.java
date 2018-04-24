@@ -6,6 +6,9 @@ import com.yuantiku.siphon.data.apkconfigs.ApkConfig;
 import com.yuantiku.siphon.data.apkconfigs.ApkType;
 import com.yuantiku.siphon.factory.SingletonFactory;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import proguard.annotation.KeepClassMemberNames;
 import se.emilsjolander.sprinkles.Model;
 import se.emilsjolander.sprinkles.annotations.Column;
@@ -64,4 +67,18 @@ public class FileEntry extends Model {
         apkConfigType = apkConfig.getType().name();
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s\n%s", name, formatDate(date));
+    }
+
+    private static String formatDate(String dateStr) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
+            return simpleDateFormat1.format(simpleDateFormat.parse(dateStr));
+        } catch (ParseException ignored) {
+        }
+        return dateStr;
+    }
 }

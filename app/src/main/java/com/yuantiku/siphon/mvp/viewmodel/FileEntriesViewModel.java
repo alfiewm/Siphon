@@ -1,14 +1,13 @@
 package com.yuantiku.siphon.mvp.viewmodel;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +15,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.yuantiku.siphon.R;
 import com.yuantiku.siphon.data.FileEntry;
 import com.yuantiku.siphon.data.apkconfigs.ApkConfig;
 import com.yuantiku.siphon.factory.EmptyObjectFactory;
@@ -32,15 +31,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import bwzz.taskmanager.TaskException;
-
-import static android.R.attr.entries;
-import static android.R.attr.name;
 
 /**
  * Created by wanghb on 15/9/5.
@@ -75,31 +70,19 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        TabLayout tabLayout = new TabLayout(container.getContext());
-        SpannableStringBuilder ssBuilder = new SpannableStringBuilder("所有");
-        ssBuilder.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        TabLayout.Tab allTab = tabLayout.newTab().setText(ssBuilder).setTag(TabTag.all);
-        tabLayout.addTab(allTab);
-        SpannableStringBuilder wishBuilder = new SpannableStringBuilder("猜你想要");
-        wishBuilder.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        TabLayout.Tab wishTab = tabLayout.newTab().setText(wishBuilder).setTag(TabTag.guess);
-        tabLayout.addTab(wishTab);
+        View root = inflater.inflate(R.layout.fragment_file_entries, container, false);
+        TabLayout tabLayout = root.findViewById(R.id.tabLayout);
+        tabLayout.addTab(tabLayout.newTab().setText("所有").setTag(TabTag.all));
+        tabLayout.addTab(tabLayout.newTab().setText("猜你想要").setTag(TabTag.guess));
         tabLayout.setOnTabSelectedListener(this);
-        swipeRefreshLayout = new SwipeRefreshLayout(container.getContext());
-        listView = new ListView(container.getContext());
+        swipeRefreshLayout = root.findViewById(R.id.swipeRefreshLayout);
+        listView = root.findViewById(R.id.listView);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
-        swipeRefreshLayout.addView(listView);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            handler.refresh();
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> handler.refresh());
         swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
-        LinearLayout linearLayout = new LinearLayout(container.getContext());
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.addView(tabLayout);
-        linearLayout.addView(swipeRefreshLayout);
-        return linearLayout;
+        return root;
     }
 
     @Override
@@ -226,7 +209,8 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
         public void updateItemProgress(FileEntry fileEntry, float progress) {
             TextView textView = getItemView(fileEntry);
             if (textView != null) {
-                textView.setText(fileEntry.name + "\n" + progress);
+                textView.setText(String.format("%s\n%.2f%%", fileEntry.toString(), progress));
+                textView.setTextColor(Color.parseColor("#0056cc"));
             }
         }
 
@@ -235,7 +219,7 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
             if (textView == null) {
                 return;
             }
-            textView.setText(fileEntry.name);
+            textView.setText(fileEntry.toString());
             textView.setTextColor(Color.parseColor("#239609"));
         }
 
@@ -275,22 +259,13 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
             TextView textView = (TextView) convertView;
             if (textView == null) {
                 textView = new TextView(parent.getContext());
-                textView.setMinLines(3);
+                textView.setGravity(Gravity.CENTER_VERTICAL);
+                textView.setTextSize(18);
+                textView.setPadding(dp2Px(parent.getContext(), 16), 0, 0, 0);
+                textView.setMinHeight(dp2Px(parent.getContext(), 90));
             }
             FileEntry fileEntry = (FileEntry) getItem(position);
-            String date = fileEntry.date;
-            try {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒");
-                date = simpleDateFormat1.format(simpleDateFormat.parse(fileEntry.date));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            textView.setTextSize(18);
-            textView.setText(String.format("%s\n%s", fileEntry.name, date));
-            int pad = 30;
-            textView.setPadding(pad, pad, pad, pad);
+            textView.setText(fileEntry.toString());
 
             IFileModel fileModel = fileModelFactory.createFileModel(fileEntry);
             textView.setTextColor(fileModel.exists() ? Color.parseColor("#239609") : Color.BLACK);
@@ -303,6 +278,10 @@ public class FileEntriesViewModel extends BaseViewModel implements IView,
             entry2View.put(fileEntry.name, textView);
 
             return textView;
+        }
+
+        private int dp2Px(Context context, int dp) {
+            return (int) (context.getResources().getDisplayMetrics().density * dp);
         }
     }
 }
