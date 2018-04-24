@@ -5,8 +5,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     def versionMajor = 1
-    def versionMinor = 5
-
+    def versionMinor = 6
     defaultConfig {
         applicationId "com.yuantiku.siphon"
         minSdkVersion 16
@@ -16,16 +15,14 @@ android {
         resValue "string", "fir_api_token", "7a1f9c7e3ec66f6052f1db329e2abf62"
         javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
     }
-
-//    signingConfigs {
-//        signingConf {
-//            storeFile file(project.property("signConf.keystoreFile"))
-//            storePassword project.property("signConf.storePassword")
-//            keyAlias project.property("signConf.keyAlias")
-//            keyPassword project.property("signConf.keyPassword")
-//        }
-//    }
-
+    signingConfigs {
+        signingConf {
+            storeFile file("siphon.keystore")
+            storePassword System.getenv("SIPHON_PWD")
+            keyAlias("siphon")
+            keyPassword System.getenv("SIPHON_PWD")
+        }
+    }
     def getCommit = { ->
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -34,12 +31,10 @@ android {
         }
         return stdout.toString().trim().substring(0, 4)
     }
-
     def renameOutputApkFile = { variant, defaultConfig ->
         variant.outputs.each { output ->
-            def file = output.outputFile
-            def fileName = file.name
-            if (variant.buildType.name.equals("release")) {
+            def fileName
+            if (variant.buildType.name == "release") {
                 fileName = "siphon-${defaultConfig.versionName}.apk"
             } else {
                 fileName = "siphon-debug-${getCommit()}.apk"
@@ -47,40 +42,35 @@ android {
             output.outputFileName = fileName
         }
     }
-
     buildTypes {
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'libs/annotations.pro'
-//            signingConfig signingConfigs.signingConf
+            signingConfig signingConfigs.signingConf
         }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'libs/annotations.pro'
-//            signingConfig signingConfigs.signingConf
+            signingConfig signingConfigs.signingConf
             applicationVariants.all { variant ->
                 renameOutputApkFile(variant, defaultConfig)
             }
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     lintOptions {
         disable 'InvalidPackage'
     }
-
     packagingOptions {
         exclude 'META-INF/services/javax.annotation.processing.Processor'
     }
-
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile "com.android.support:appcompat-v7:${project.supportLibVersion}"
     compile "com.android.support:design:${project.supportLibVersion}"
     compile 'io.reactivex:rxandroid:1.0.1'
@@ -94,9 +84,8 @@ dependencies {
     compile 'com.koushikdutta.ion:ion:2.1.9'
     compile 'com.orhanobut:hawk:1.18'
     compile 'se.emilsjolander:sprinkles:1.2.0'
-    compile "com.google.dagger:dagger:2.0.1"
+    compile 'com.google.dagger:dagger:2.0.1'
     annotationProcessor "com.google.dagger:dagger-compiler:2.0.1"
-
     compile 'be.shouldit:android-proxy-library:4.2.6'
     // Unit testing dependencies
     testCompile 'junit:junit:4.12'

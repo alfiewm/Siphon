@@ -10,3 +10,4 @@ app/proguard_mapping.txt
 /captures
 *.iml
 node_modules
+siphon.keystore
