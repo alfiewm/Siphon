@@ -1,47 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="com.yuantiku.siphon"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.yuantiku.siphon">
 
     <application
         android:name=".app.Siphon"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        tools:replace="android:icon"
-        android:theme="@style/AppTheme">
+        android:resizeableActivity="false"
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
+
+        <!--支持全面屏，避免在屏幕上下留黑边。此属性仅在resizeableActivity设置为false时生效
+         https://stackoverflow.com/questions/43179314/where-does-android-max-aspect-meta-make-difference -->
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="bwzz.activityReuse.ContainerActivity"/>
+        <activity android:name="bwzz.activityReuse.ContainerActivity" />
 
-        <service android:name=".service.WorkService"/>
-        <service android:name=".service.CheckUpdateService"/>
+        <service android:name=".service.WorkService" />
+        <service android:name=".service.CheckUpdateService" />
 
         <provider
             android:name=".mvp.model.FileEntryModel$FileEntryProvider"
             android:authorities="siphon.yuantiku.com"
-            android:exported="false"/>
+            android:exported="false" />
 
         <meta-data
             android:name="BUG_HD_SDK_GENERAL_KEY"
-            android:value="f8790b5a04327916b3d61973c0ee9411"/>
+            android:value="f8790b5a04327916b3d61973c0ee9411" />
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
 </manifest>
